@@ -5,6 +5,7 @@ from os.path import exists
 from random import randint, choice
 from string import ascii_lowercase as a_lc
 
+
 # Cipher classes
 class AbstractCipher:
 
@@ -21,18 +22,21 @@ class AbstractCipher:
         pass
 
     def load_key(self) -> str:
-        if not exists("crypto_key.txt"):
+        if not exists("data/crypto_key.txt"):
             self.write_key()
 
-        with open("crypto_key.txt", "r", encoding="utf-8") as kf:
+        with open("data/crypto_key.txt", "r", encoding="utf-8") as kf:
             return (kf.read())[2:]
     
     def find_index(self, c: str) -> int:
-       if not c.isalpha(): return -1
-       elif c == 'ё': return 6
-       elif c not in ['а', 'б', 'в', 'г', 'д', 'е']:
-           return ord(c) - ord(self.letters[0]) + 1
-       return ord(c) - ord(self.letters[0])
+        if not c.isalpha():
+            return -1
+        elif c == 'ё':
+            return 6
+        elif c not in ['а', 'б', 'в', 'г', 'д', 'е']:
+            return ord(c) - ord(self.letters[0]) + 1
+        else:
+            return ord(c) - ord(self.letters[0])
 
 
 class CaesarCipher(AbstractCipher):
@@ -40,21 +44,21 @@ class CaesarCipher(AbstractCipher):
     letters: str
     ecr_letters: list
 
-    def __init__(self, lang: str = None, way: str = None):
+    def __init__(self, lang: str = None):
         self.mod_num = 26 if lang == "eng" else 33
         self.letters = a_lc if lang == "eng" else "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 
         if lang == "eng":
             self.ecr_letters = ['e', 't', 'a', 'o', 'i', 'n', 's',
-                           'h', 'r', 'd', 'l', 'c', 'u', 'm',
-                           'w', 'f', 'g', 'y', 'p', 'b', 'v', 
-                           'k', 'x', 'j', 'q', 'z']
+                                'h', 'r', 'd', 'l', 'c', 'u', 'm',
+                                'w', 'f', 'g', 'y', 'p', 'b', 'v',
+                                'k', 'x', 'j', 'q', 'z']
         else:
             self.ecr_letters = ['о', 'а', 'е', 'и', 'т', 'н', 'л',
-                           'р', 'с', 'в', 'к', 'м', 'д', 'у', 'п',
-                           'б', 'г', 'ы', 'ч', 'ь', 'з', 'я', 'й',
-                           'х', 'ж', 'ш', 'ю', 'ф', 'э', 'щ',
-                           'ё', 'ц', 'ъ']
+                                'р', 'с', 'в', 'к', 'м', 'д', 'у', 'п',
+                                'б', 'г', 'ы', 'ч', 'ь', 'з', 'я', 'й',
+                                'х', 'ж', 'ш', 'ю', 'ф', 'э', 'щ',
+                                'ё', 'ц', 'ъ']
 
     def encrypt(self, file_data: list, fl: int = 1) -> list: 
         key = int(self.load_key())   
@@ -64,7 +68,8 @@ class CaesarCipher(AbstractCipher):
             if index != -1:
                 is_upp = file_data[i].isupper() 
                 file_data[i] = self.letters[(index + key * fl) % self.mod_num]
-                if is_upp: file_data[i] = file_data[i].upper()
+                if is_upp:
+                    file_data[i] = file_data[i].upper()
                 
         return file_data
 
@@ -87,20 +92,22 @@ class CaesarCipher(AbstractCipher):
         return bfile_data
 
     def write_key(self) -> None:
-        if exists("crypto_key.txt"):
-            with open("crypto_key.txt", "r") as kfile:
-                if (kfile.read())[:2] == '1 ': return
+        if exists("data/crypto_key.txt"):
+            with open("data/crypto_key.txt", "r") as kfile:
+                if (kfile.read())[:2] == '1 ':
+                    return
         
         key = randint(0, self.mod_num)
-        with open("crypto_key.txt", "w", encoding="utf-8") as kfile:
+        with open("data/crypto_key.txt", "w", encoding="utf-8") as kfile:
             kfile.write("1 " + str(key))
+
 
 class VigenereCipher(AbstractCipher):
     mod_num: int
     letters: str
     lang: str
 
-    def __init__(self, lang: str = None, way: str = None):
+    def __init__(self, lang: str = None):
         self.mod_num = 26 if lang == "eng" else 33
         self.letters = a_lc if lang == "eng" else "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
         self.lang = lang
@@ -125,15 +132,16 @@ class VigenereCipher(AbstractCipher):
         return self.encrypt(file_data, -1)
 
     def write_key(self) -> None:
-        if exists("crypto_key.txt"):
-            with open("crypto_key.txt", "r") as kfile:
+        if exists("data/crypto_key.txt"):
+            with open("data/crypto_key.txt", "r") as kfile:
                 if (kfile.read())[:2] == '2 ': return
 
         key = ""
         for i in range(randint(10, 20)):
             key += choice(self.letters)
-        with open("crypto_key.txt", "w", encoding="utf-8") as kfile:
+        with open("data/crypto_key.txt", "w", encoding="utf-8") as kfile:
             kfile.write("2 " + key)
+
 
 class VernamCipher(AbstractCipher):
     mod_num: int
@@ -162,30 +170,31 @@ class VernamCipher(AbstractCipher):
         return self.encrypt(file_data)
 
     def write_key(self) -> None:
-        if exists("crypto_key.txt"):
-            with open("crypto_key.txt", "r") as kfile:
+        if exists("data/crypto_key.txt"):
+            with open("data/crypto_key.txt", "r") as kfile:
                 if (kfile.read())[:2] == '3 ': return
  
         with open(self.way, "r", encoding="utf-8") as rfile:
             rsize = len(rfile.read())
 
         key = " ".join([str(randint(0, self.mod_num)) for i in range(rsize)])
-        with open("crypto_key.txt", "w") as kfile:
+        with open("data/crypto_key.txt", "w") as kfile:
             kfile.write("3 " + key)
 
-# -------------- Function for reading / writing with utf-8 ---------------
 
+# -------------- Function for reading / writing with utf-8 ---------------
 def read_utf8(way: str) -> list:
     with open(way, "r", encoding="utf-8") as file:
         file_data = list(file.read())
     return file_data
 
+
 def write_utf8(way: str, rbuff: list) -> None:
     with open(way, "w", encoding="utf-8") as rfile:
         rfile.write(''.join(rbuff))
 
-# --------------------------------------------------------------------
 
+# --------------------------------------------------------------------
 def main():    
     # Parsing command line's arguments
     parser = ArgumentParser(description="Encryption program parser")
